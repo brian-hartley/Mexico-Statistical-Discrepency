@@ -1,0 +1,30 @@
+# R specific
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Large data files
+*.csv
+!test_*.csv
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+*.code-workspace
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+
+# R environment
+.Renviron
+.Rprofile
+
+# Output files
+*.log
+*.out
