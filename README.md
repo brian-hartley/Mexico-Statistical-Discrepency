@@ -14,23 +14,19 @@ This project analyzes statistical discrepancies (YA3 code) across different sect
 ```
 .
 ├── R/                      # R scripts
-│   ├── pipeline.R         # Main analysis pipeline
-│   ├── config.R           # Configuration settings
-│   ├── load.R            # Data loading functions
-│   ├── process.R         # Data processing
-│   ├── plot.R            # Visualization functions
-│   ├── correlate.R       # Correlation analysis
-│   ├── analyze.R         # Statistical analysis
-│   └── test_*.R          # Test scripts
+│   └── analyze_series.R   # Main analysis script
 │
 ├── data/                  # Data files
-│   ├── processed_series.rds
-│   ├── additional_series.rds
-│   └── test_*.csv
+│   ├── *_wide.csv        # Wide-format data files
+│   ├── all_series_wide.csv
+│   └── all_series_wide_logdiff.csv
 │
 ├── plots/                 # Generated plots
-│   ├── discrepancy_timeseries_*.png
-│   └── discrepancy_*_correlation.png
+│   ├── discrepancy_levels_*.png      # Level plots for each sector
+│   ├── discrepancy_correlations.png  # Original series correlations
+│   ├── discrepancy_correlations_logdiff.png  # Log-differenced correlations
+│   ├── flow_timeseries_*.png         # Flow series plots
+│   └── economic_timeseries_*.png     # Economic series plots
 │
 └── cline_docs/           # Documentation
     ├── projectContext.md
@@ -46,28 +42,30 @@ This project analyzes statistical discrepancies (YA3 code) across different sect
    - Efficient handling of large CSV files
    - Focused extraction of relevant series
    - Clean and standardized output
+   - Log-differenced series for stationarity
 
 2. Analysis:
-   - Time series visualization
-   - Correlation analysis
+   - Time series visualization with proper scaling (T/B/M pesos)
+   - Correlation analysis for both original and log-differenced series
    - Cross-sector comparisons
 
 3. Visualization:
-   - Individual sector plots
+   - Individual sector plots with formatted axis labels (T/B/M pesos)
    - Correlation heatmaps
    - Clear labeling and formatting
 
 ## Usage
 
-1. Run the main analysis:
+Run the main analysis:
 ```R
-Rscript R/pipeline.R
+Rscript R/analyze_series.R
 ```
 
-2. Examine test data:
-```R
-Rscript R/test_correlation_data.R
-```
+This will:
+1. Load and process all series
+2. Generate level plots for discrepancies
+3. Create correlation plots
+4. Save both original and log-differenced datasets
 
 ## Data Coverage
 
@@ -76,7 +74,7 @@ Rscript R/test_correlation_data.R
 - Values: Millions MXN
 - Series types:
   - Statistical discrepancies (YA3)
-  - Flow of funds indicators
+  - Flow of funds indicators (excluding monetary gold)
   - Economic series
 
 ## Dependencies
@@ -84,8 +82,5 @@ Rscript R/test_correlation_data.R
 - R 4.1+
 - Required packages:
   - data.table
-  - tidyr
   - ggplot2
-  - corrplot
-  - readr
   - scales
