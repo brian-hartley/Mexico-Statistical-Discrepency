@@ -97,12 +97,13 @@ for (code in series_codes[-1]) {  # Skip YA3 since we already loaded it
 merged_data <- Reduce(function(x, y) merge(x, y, by = "year"), all_data)
 
 # Create log differenced versions of all series
-merged_data_log_diff <- copy(merged_data)
 numeric_cols <- names(merged_data)[sapply(merged_data, is.numeric)]
+merged_data_log_diff <- data.table(year = merged_data$year)
 
 for (col in numeric_cols) {
   # Calculate log differences
-  merged_data_log_diff[, paste0(col, "_logdiff") := c(NA, diff(log(abs(get(col)) + 1)))]
+  log_diff_values <- c(NA, diff(log(abs(merged_data[[col]]) + 1)))
+  merged_data_log_diff[, (col) := log_diff_values]
 }
 
 # Save complete datasets
@@ -258,8 +259,7 @@ ggsave("plots/discrepancy_correlations.png",
        p_disc, width = 12, height = 10, dpi = 300)
 
 # Plot discrepancy correlations for log differenced series
-disc_cols_logdiff <- paste0(disc_cols, "_logdiff")
-disc_cor_logdiff <- cor(as.matrix(merged_data_log_diff[, ..disc_cols_logdiff]), 
+disc_cor_logdiff <- cor(as.matrix(merged_data_log_diff[, ..disc_cols]), 
                        use = "pairwise.complete.obs")
 
 # Ensure diagonal is exactly 1
@@ -275,10 +275,6 @@ disc_cor_logdiff_long <- melt(disc_cor_logdiff_long,
                              id.vars = "Sector1",
                              variable.name = "Sector2",
                              value.name = "Correlation")
-
-# Clean up sector names
-disc_cor_logdiff_long[, Sector1 := gsub("_logdiff$", "", Sector1)]
-disc_cor_logdiff_long[, Sector2 := gsub("_logdiff$", "", Sector2)]
 
 # Remove NA values
 disc_cor_logdiff_long <- disc_cor_logdiff_long[!is.na(Correlation)]
@@ -323,7 +319,6 @@ ggsave("plots/discrepancy_correlations_logdiff.png",
 # Calculate correlations between discrepancies and other series
 # For both original and log differenced series
 other_cols <- c(flow_cols, econ_cols)
-other_cols_logdiff <- paste0(other_cols, "_logdiff")
 
 # Original series correlations
 disc_other_cor <- cor(as.matrix(merged_data[, ..disc_cols]),
@@ -372,8 +367,8 @@ ggsave("plots/discrepancy_other_correlations.png",
        p_disc_other, width = 15, height = 10, dpi = 300)
 
 # Log differenced series correlations
-disc_other_cor_logdiff <- cor(as.matrix(merged_data_log_diff[, ..disc_cols_logdiff]),
-                             as.matrix(merged_data_log_diff[, ..other_cols_logdiff]),
+disc_other_cor_logdiff <- cor(as.matrix(merged_data_log_diff[, ..disc_cols]),
+                             as.matrix(merged_data_log_diff[, ..other_cols]),
                              use = "pairwise.complete.obs")
 
 disc_other_cor_logdiff_long <- as.data.table(disc_other_cor_logdiff, keep.rownames = TRUE)
@@ -384,8 +379,7 @@ disc_other_cor_logdiff_long <- melt(disc_other_cor_logdiff_long,
                                    value.name = "Correlation")
 
 # Clean up names and add labels
-disc_other_cor_logdiff_long[, Sector := gsub("_logdiff$", "", Sector)]
-disc_other_cor_logdiff_long[, Series := gsub("_Total_logdiff$", "", Series)]
+disc_other_cor_logdiff_long[, Series := gsub("_Total$", "", Series)]
 disc_other_cor_logdiff_long[, Series_label := series_labels[Series]]
 disc_other_cor_logdiff_long[, Sector_label := sector_labels[Sector]]
 
